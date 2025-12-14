@@ -1,40 +1,26 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ular Tangga</title>
-
-<style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ular Tangga Smooth FIX</title><style>
 body{
   margin:0;
-  font-family:system-ui;
+  font-family:system-ui,Arial,sans-serif;
   background:linear-gradient(135deg,#2ecc71,#27ae60);
   display:flex;
   justify-content:center;
-  padding:20px;
+  padding:16px;
 }
-
 .container{
   background:#1e8449;
   border-radius:16px;
   padding:16px;
   width:360px;
   box-shadow:0 10px 30px rgba(0,0,0,.3);
+  color:#fff;
 }
-
-h1{
-  color:white;
-  text-align:center;
-  margin-bottom:4px;
-}
-
-.sub{
-  color:#d5f5e3;
-  text-align:center;
-  font-size:14px;
-  margin-bottom:10px;
-}
+h1{text-align:center;margin:0}
+.sub{text-align:center;font-size:13px;margin-bottom:10px;color:#d5f5e3}
 
 .board{
   position:relative;
@@ -47,7 +33,6 @@ h1{
   grid-template-rows:repeat(10,1fr);
   overflow:hidden;
 }
-
 .cell{
   border:1px solid #ddd;
   font-size:10px;
@@ -55,182 +40,161 @@ h1{
   align-items:flex-end;
   justify-content:flex-end;
   padding:2px;
+  box-sizing:border-box;
 }
+.cell:nth-child(even){background:#f2f2f2}
 
+/* PION */
 .pawn{
-  width:14px;
-  height:14px;
-  border-radius:50%;
+  width:14px;height:14px;border-radius:50%;
   position:absolute;
-  transition:all .35s cubic-bezier(.25,.8,.25,1);
+  transition:left .25s linear, top .25s linear, transform .25s;
   z-index:5;
 }
+.p1{background:#e74c3c}
+.p2{background:#3498db}
 
-.p1{ background:red; }
-.p2{ background:blue; }
-
-.snake, .ladder{
+/* VISUAL ULAR & TANGGA (CSS, TIDAK EXTERNAL) */
+.ladder{
   position:absolute;
-  pointer-events:none;
-  opacity:.85;
+  width:6px;
+  background:linear-gradient(#c0392b,#e67e22);
+  transform:rotate(-30deg);
+  border-radius:3px;
 }
-
-.controls{
-  margin-top:12px;
-  text-align:center;
-}
-
-.dice{
-  width:50px;
-  height:50px;
-  background:white;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  margin:0 auto 8px;
-  transition:transform .4s;
-}
-
-.roll{
+.ladder::before,.ladder::after{
+  content:"";
+  position:absolute;
+  left:-10px;
+  width:26px;height:4px;
   background:#f1c40f;
-  border:none;
-  padding:10px;
-  width:100%;
-  border-radius:12px;
-  font-weight:bold;
-  font-size:16px;
+}
+.ladder::before{top:15%}
+.ladder::after{bottom:15%}
+
+.snake{
+  position:absolute;
+  width:60px;height:60px;
+  border:4px solid #27ae60;
+  border-radius:50%;
+  transform:rotate(20deg);
 }
 
-.info{
-  margin-top:8px;
-  color:white;
-  text-align:center;
+.controls{text-align:center;margin-top:10px}
+.dice{
+  width:50px;height:50px;background:#fff;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:#000;margin:0 auto 6px;
 }
-
-.toggle{
-  margin-top:8px;
-  font-size:14px;
-  color:white;
+.spin{animation:spin .5s}
+@keyframes spin{to{transform:rotate(360deg)}}
+button{
+  width:100%;padding:10px;border:none;border-radius:12px;
+  background:#f1c40f;font-weight:bold;font-size:15px;
 }
-</style>
-</head>
-
-<body>
+.info{text-align:center;margin-top:6px}
+.toggle{margin-top:6px;font-size:14px}
+</style></head><body>
 <div class="container">
 <h1>🎲 Ular Tangga</h1>
-<div class="sub">2 Pemain • Langsung Main</div>
-
-<div class="board" id="board"></div>
-
-<!-- Ular & Tangga -->
-<img class="ladder" src="https://i.imgur.com/0Q9ZQZJ.png" style="left:30%;top:55%;width:20%;transform:rotate(-20deg)">
-<img class="snake" src="https://i.imgur.com/Z3ZK5Jf.png" style="left:50%;top:10%;width:30%">
-
-<div class="controls">
-<div class="dice" id="dice">🎲</div>
-<button class="roll" onclick="rollDice()">Roll Dadu</button>
-<div class="info" id="info">Giliran: Pemain 1</div>
-<div class="toggle">
-<label><input type="checkbox" checked onchange="soundOn=this.checked"> Sound</label>
+<div class="sub">2 Pemain • Versi Stabil</div><div class="board" id="board"></div><!-- VISUAL ULAR & TANGGA --><div class="ladder" style="left:22%;top:45%;height:40%"></div>
+<div class="snake" style="left:55%;top:15%"></div><div class="controls">
+  <div class="dice" id="dice">🎲</div>
+  <button onclick="rollDice()">Roll Dadu</button>
+  <div class="info" id="info">Giliran: Pemain 1</div>
+  <div class="toggle">
+    <label><input type="checkbox" checked onchange="soundOn=this.checked"> Sound</label>
+  </div>
 </div>
-</div>
-</div>
-
-<!-- SOUND -->
-<audio id="sndDice" src="https://cdn.pixabay.com/audio/2022/03/15/audio_9e8c9bb2b0.mp3"></audio>
-<audio id="sndUp" src="https://cdn.pixabay.com/audio/2022/10/30/audio_71d2b7c72d.mp3"></audio>
-<audio id="sndDown" src="https://cdn.pixabay.com/audio/2022/03/10/audio_9a3c7b58f3.mp3"></audio>
-<audio id="sndWin" src="https://cdn.pixabay.com/audio/2022/03/23/audio_46c40c6d47.mp3"></audio>
+</div><!-- SOUND (AMAN, TIDAK CRASH JIKA GAGAL LOAD) --><audio id="sndDice" preload="auto"></audio> <audio id="sndUp" preload="auto"></audio> <audio id="sndDown" preload="auto"></audio> <audio id="sndWin" preload="auto"></audio>
 
 <script>
-const board=document.getElementById("board");
-const info=document.getElementById("info");
-const diceEl=document.getElementById("dice");
-
+/* ===== INIT ===== */
+const board=document.getElementById('board');
+const info=document.getElementById('info');
+const diceEl=document.getElementById('dice');
 let soundOn=true;
 let turn=0;
-let pos=[0,0];
+let pos=[1,1];
 
 const snakes={17:7,54:34};
 const ladders={3:22,20:38};
 
+/* ===== BUILD BOARD ===== */
 for(let i=100;i>=1;i--){
-  const c=document.createElement("div");
-  c.className="cell";
+  const c=document.createElement('div');
+  c.className='cell';
   c.textContent=i;
   board.appendChild(c);
 }
 
-const pawns=[
-  createPawn("p1"),
-  createPawn("p2")
-];
+/* ===== PAWNS ===== */
+const p1=document.createElement('div'); p1.className='pawn p1';
+const p2=document.createElement('div'); p2.className='pawn p2';
+board.appendChild(p1); board.appendChild(p2);
+placePawn(1,p1); placePawn(1,p2);
 
-function createPawn(cls){
-  const p=document.createElement("div");
-  p.className="pawn "+cls;
-  board.appendChild(p);
-  return p;
+function placePawn(n,p){
+  const i=n-1;
+  const row=Math.floor(i/10);
+  const col=i%10;
+  p.style.left=(col*10+1)+'%';
+  p.style.top=((9-row)*10+1)+'%';
 }
 
+/* ===== SOUND SAFE PLAY ===== */
 function play(id){
-  if(soundOn) document.getElementById(id).play();
+  if(!soundOn) return;
+  const a=document.getElementById(id);
+  if(!a) return;
+  try{ a.currentTime=0; a.play(); }catch(e){}
 }
 
+/* ===== GAME LOGIC ===== */
 function rollDice(){
   const d=Math.floor(Math.random()*6)+1;
-  diceEl.style.transform="rotate(360deg)";
-  setTimeout(()=>diceEl.style.transform="rotate(0deg)",400);
+  diceEl.classList.add('spin');
+  setTimeout(()=>diceEl.classList.remove('spin'),500);
   diceEl.textContent=d;
-  play("sndDice");
+  play('sndDice');
   movePawn(d);
 }
 
 async function movePawn(step){
+  const pawn=turn===0?p1:p2;
   for(let i=0;i<step;i++){
     pos[turn]++;
-    updatePawn();
-    await sleep(300);
+    if(pos[turn]>100) pos[turn]=100;
+    placePawn(pos[turn],pawn);
+    await sleep(250);
   }
 
   if(ladders[pos[turn]]){
-    play("sndUp");
+    play('sndUp');
     pos[turn]=ladders[pos[turn]];
-    updatePawn(true);
+    pawn.style.transform='scale(1.4)';
+    placePawn(pos[turn],pawn);
+    setTimeout(()=>pawn.style.transform='scale(1)',300);
   }
 
   if(snakes[pos[turn]]){
-    play("sndDown");
+    play('sndDown');
     pos[turn]=snakes[pos[turn]];
-    updatePawn(true);
+    pawn.style.transform='scale(0.8)';
+    placePawn(pos[turn],pawn);
+    setTimeout(()=>pawn.style.transform='scale(1)',300);
   }
 
   if(pos[turn]>=100){
-    play("sndWin");
-    alert("Pemain "+(turn+1)+" MENANG!");
-    location.reload();
+    play('sndWin');
+    setTimeout(()=>alert('Pemain '+(turn+1)+' MENANG!'),200);
+    return;
   }
 
   turn=1-turn;
-  info.textContent="Giliran: Pemain "+(turn+1);
+  info.textContent='Giliran: Pemain '+(turn+1);
 }
 
-function updatePawn(jump=false){
-  const p=pawns[turn];
-  const n=pos[turn]-1;
-  const row=Math.floor(n/10);
-  const col=n%10;
-  p.style.left=(col*10+1)+"%";
-  p.style.top=((9-row)*10+1)+"%";
-  if(jump){
-    p.style.transform="scale(1.4)";
-    setTimeout(()=>p.style.transform="scale(1)",300);
-  }
-}
-
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-</script>
-</body>
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+</script></body>
 </html>
