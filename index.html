@@ -1,295 +1,127 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ular Tangga 2 Pemain - Langsung Main</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #11998e, #38ef7d);
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: rgba(0,0,0,0.35);
-      padding: 20px;
-      border-radius: 18px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-      max-width: 520px;
-      width: 100%;
-    }
-    h1 { text-align: center; margin-bottom: 8px; }
-    canvas {
-      display: block;
-      margin: 10px auto;
-      border-radius: 12px;
-      background: #fff;
-    }
-    .dice {
-      width: 90px;
-      height: 90px;
-      margin: 12px auto;
-      background: #fff;
-      border-radius: 12px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(3, 1fr);
-      align-items: center;
-      justify-items: center;
-      perspective: 600px;
-    }
-    .dice.rolling {
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotateX(0deg) rotateY(0deg); }
-      50% { transform: rotateX(180deg) rotateY(180deg); }
-      100% { transform: rotateX(360deg) rotateY(360deg); }
-    }
-    .dot {
-      width: 14px;
-      height: 14px;
-      background: #000;
-      border-radius: 50%;
-      opacity: 0;
-    }
-    .rolling { animation: roll 0.6s ease-in-out infinite; }
-    @keyframes roll {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(10deg); }
-      50% { transform: rotate(-10deg); }
-      75% { transform: rotate(10deg); }
-      100% { transform: rotate(0deg); }
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      font-size: 18px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      background: #ffeb3b;
-      color: #000;
-      font-weight: bold;
-    }
-    .info { text-align: center; margin-top: 10px; font-size: 16px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ular Tangga</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(#2ecc71,#27ae60);
+  display:flex;
+  justify-content:center;
+}
+.container{
+  width:95%;
+  max-width:420px;
+  background:#1e8449;
+  margin:20px;
+  border-radius:20px;
+  padding:15px;
+  color:white;
+  text-align:center;
+}
+.board{
+  width:100%;
+  aspect-ratio:1;
+  background:white;
+  border-radius:15px;
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  position:relative;
+}
+.cell{
+  border:1px solid #ddd;
+  font-size:10px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-start;
+  padding:2px;
+}
+.pawn{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  position:absolute;
+  transition:all .3s ease;
+}
+.p1{background:red;}
+.p2{background:blue;}
+.dice{
+  width:50px;
+  height:50px;
+  background:white;
+  margin:10px auto;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  color:black;
+}
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#f1c40f;
+  font-weight:bold;
+  font-size:16px;
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎲 Ular Tangga</h1>
-    <div style="text-align:center">2 Pemain • Langsung Main</div><canvas id="board" width="400" height="400"></canvas>
 
-<div class="dice" id="dice">
-  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+<div class="container">
+<h2>🎲 Ular Tangga</h2>
+<p>2 Pemain • Langsung Main</p>
+
+<div class="board" id="board"></div>
+
+<div class="dice" id="dice">🎲</div>
+<button onclick="rollDice()">Roll Dadu</button>
+<p id="turn">Giliran: Pemain 1</p>
 </div>
-<button id="rollBtn">Roll Dadu</button>
 
-<div class="info" id="info">Giliran: Pemain 1</div>
+<script>
+const board=document.getElementById("board");
+let pos=[1,1];
+let turn=0;
 
-  </div><script>
-  const canvas = document.getElementById('board');
-  const ctx = canvas.getContext('2d');
-  const diceEl = document.getElementById('dice');
-  const rollBtn = document.getElementById('rollBtn');
-  const info = document.getElementById('info');
+for(let i=100;i>=1;i--){
+  const c=document.createElement("div");
+  c.className="cell";
+  c.textContent=i;
+  board.appendChild(c);
+}
 
-  const grid = 10;
-  const size = canvas.width / grid;
+const p1=document.createElement("div");
+p1.className="pawn p1";
+const p2=document.createElement("div");
+p2.className="pawn p2";
+board.appendChild(p1);
+board.appendChild(p2);
 
-  let currentPlayer = 0;
-  let animating = false;
-  let positions = [1, 1];
+function placePawn(p,el){
+  const cell=board.children[100-p];
+  el.style.left=cell.offsetLeft+4+"px";
+  el.style.top=cell.offsetTop+4+"px";
+}
 
-  const players = [
-    { color: 'red' },
-    { color: 'blue' }
-  ];
+placePawn(1,p1);
+placePawn(1,p2);
 
-  const ladders = {
-    4:14, 9:31, 20:38, 28:84, 40:59, 51:67, 63:81
-  };
-  const snakes = {
-    17:7, 54:34, 62:19, 64:60, 87:36, 93:73, 95:75, 99:78
-  };
+function rollDice(){
+  const d=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").textContent=d;
+  pos[turn]+=d;
+  if(pos[turn]>100)pos[turn]=100;
+  placePawn(pos[turn],turn===0?p1:p2);
+  turn=1-turn;
+  document.getElementById("turn").textContent="Giliran: Pemain "+(turn+1);
+}
+</script>
 
-  function drawBoard() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    // papan
-    for (let i=0;i<grid;i++){
-      for (let j=0;j<grid;j++){
-        ctx.fillStyle = (i+j)%2===0 ? '#f5f5f5' : '#e0e0e0';
-        ctx.fillRect(j*size, i*size, size, size);
-      }
-    }
-
-    // tangga
-    ctx.strokeStyle = 'green';
-    ctx.lineWidth = 4;
-    Object.keys(ladders).forEach(start=>{
-      const end = ladders[start];
-      const a = cellPos(+start);
-      const b = cellPos(end);
-      ctx.beginPath();
-      ctx.moveTo(a.x+size/2, a.y+size/2);
-      ctx.lineTo(b.x+size/2, b.y+size/2);
-      ctx.stroke();
-    });
-
-    // ular
-    ctx.strokeStyle = 'brown';
-    ctx.lineWidth = 4;
-    Object.keys(snakes).forEach(start=>{
-      const end = snakes[start];
-      const a = cellPos(+start);
-      const b = cellPos(end);
-      ctx.beginPath();
-      ctx.moveTo(a.x+size/2, a.y+size/2);
-      ctx.lineTo(b.x+size/2, b.y+size/2);
-      ctx.stroke();
-    });
-
-    // angka
-    ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
-    for (let n=1;n<=100;n++){
-      const {x,y} = cellPos(n);
-      ctx.fillText(n, x+4, y+14);
-    }
-
-    // pion
-    positions.forEach((p,i)=>{
-      const {x,y} = cellPos(p);
-      ctx.beginPath();
-      ctx.arc(x+size/2, y+size/2, size/4, 0, Math.PI*2);
-      ctx.fillStyle = players[i].color;
-      ctx.shadowColor = '#000';
-      ctx.shadowBlur = 8;
-      ctx.fill();
-    });
-  }
-    }
-
-    // angka
-    ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
-    for (let n=1;n<=100;n++){
-      const {x,y} = cellPos(n);
-      ctx.fillText(n, x+4, y+14);
-    }
-
-    // pemain
-    positions.forEach((p,i)=>{
-      const {x,y} = cellPos(p);
-      ctx.beginPath();
-      ctx.arc(x+size/2, y+size/2, size/4, 0, Math.PI*2);
-      ctx.fillStyle = players[i].color;
-      ctx.fill();
-    });
-  }
-
-  function cellPos(num){
-    const r = Math.floor((num-1)/grid);
-    const c = (num-1)%grid;
-    const y = canvas.height - (r+1)*size;
-    const x = r%2===0 ? c*size : (grid-1-c)*size;
-    return {x,y};
-  }
-
-  rollBtn.onclick = ()=>{
-    if (animating) return;
-    animating = true;
-    rollBtn.disabled = true;
-    diceEl.classList.add('rolling');
-
-    const dots = diceEl.querySelectorAll('.dot');
-    dots.forEach(d=>d.style.opacity=0);
-
-    setTimeout(()=>{
-      const roll = Math.floor(Math.random()*6)+1;
-      showDice(roll);
-      diceEl.classList.remove('rolling');
-
-      movePlayerSmooth(currentPlayer, roll, ()=>{
-        if (positions[currentPlayer] === 100) {
-          info.textContent = `🎉 Pemain ${currentPlayer+1} MENANG!`;
-          animating = false;
-          return;
-        }
-        currentPlayer = currentPlayer===0?1:0;
-        info.textContent = `Giliran: Pemain ${currentPlayer+1}`;
-        rollBtn.disabled = false;
-        animating = false;
-      });
-    },800);
-  }
-
-  function showDice(n){
-    const map = {1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
-    const dots = diceEl.querySelectorAll('.dot');
-    dots.forEach((d,i)=>d.style.opacity = map[n].includes(i)?1:0);
-  }
-
-  function movePlayerSmooth(player, steps, callback){
-    let step = 0;
-    function stepMove(){
-      if (step < steps){
-        positions[player]++;
-        if (positions[player] > 100) positions[player]=100;
-        drawBoard();
-        step++;
-        setTimeout(stepMove,180);
-      } else {
-        if (ladders[positions[player]]){
-          jumpEffect(player, ladders[positions[player]]);
-        } else if (snakes[positions[player]]){
-          positions[player] = snakes[positions[player]];
-          drawBoard();
-          callback();
-        } else {
-          callback();
-        }
-      }
-    }
-    stepMove();
-  }
-
-  function jumpEffect(player, target){
-    let jumps = 0;
-    const interval = setInterval(()=>{
-      drawBoard();
-      ctx.save();
-      const {x,y} = cellPos(positions[player]);
-      ctx.beginPath();
-      ctx.arc(x+size/2, y+size/2-8, size/4, 0, Math.PI*2);
-      ctx.fillStyle = players[player].color;
-      ctx.fill();
-      ctx.restore();
-      jumps++;
-      if (jumps > 6){
-        clearInterval(interval);
-        positions[player] = target;
-        drawBoard();
-        callback();
-      }
-    },120);
-  } else {
-        if (ladders[positions[player]]) positions[player]=ladders[positions[player]];
-        if (snakes[positions[player]]) positions[player]=snakes[positions[player]];
-        drawBoard();
-        callback();
-      }
-    }
-    stepMove();
-  }
-
-  drawBoard();
-</script></body>
+</body>
 </html>
