@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ular Tangga</title>
+<title>Ular Tangga Advanced</title>
 <style>
 body{
   margin:0;
@@ -14,9 +13,9 @@ body{
 }
 .container{
   width:95%;
-  max-width:420px;
+  max-width:430px;
   background:#1e8449;
-  margin:20px;
+  margin:15px;
   border-radius:20px;
   padding:15px;
   color:white;
@@ -28,100 +27,108 @@ body{
   background:white;
   border-radius:15px;
   display:grid;
-  grid-template-columns:repeat(10,1fr);
   position:relative;
 }
 .cell{
   border:1px solid #ddd;
   font-size:10px;
-  display:flex;
-  align-items:flex-end;
-  justify-content:flex-start;
   padding:2px;
+  box-sizing:border-box;
 }
+.cell:nth-child(even){background:#ecf0f1}
 .pawn{
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  position:absolute;
-  transition:all .3s ease;
+  width:14px;height:14px;border-radius:50%;position:absolute;
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
 }
-.p1{background:red;}
-.p2{background:blue;}
+.p1{background:red}
+.p2{background:blue}
 .dice{
-  width:50px;
-  height:50px;
-  background:white;
-  margin:10px auto;
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  color:black;
+  width:50px;height:50px;background:white;margin:10px auto;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;color:black;
 }
+.spin{animation:spin .6s}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  background:#f1c40f;
-  font-weight:bold;
-  font-size:16px;
+  width:100%;padding:10px;border:none;border-radius:12px;
+  background:#f1c40f;font-weight:bold;font-size:15px;margin-top:5px
 }
+.settings{
+  background:#145a32;border-radius:12px;padding:10px;margin-bottom:10px
+}
+.settings input{width:100%;margin:3px 0;padding:6px;border-radius:8px;border:none}
 </style>
 </head>
-<body>
-
-<div class="container">
+<body><div class="container">
 <h2>🎲 Ular Tangga</h2>
-<p>2 Pemain • Langsung Main</p>
-
-<div class="board" id="board"></div>
-
-<div class="dice" id="dice">🎲</div>
+<p>2 Pemain • Advanced</p><div class="settings">
+<b>⚙️ Pengaturan</b><br>
+Jumlah Kotak (contoh 100):
+<input id="totalCell" type="number" value="100">
+Teks kotak (pisahkan dengan koma):
+<input id="cellText" placeholder="Start,,Bonus,,Hukuman">
+<button onclick="applySettings()">Terapkan</button>
+</div><div class="board" id="board"></div><div class="dice" id="dice">🎲</div>
 <button onclick="rollDice()">Roll Dadu</button>
+<button onclick="resetGame()">Reset Game</button>
 <p id="turn">Giliran: Pemain 1</p>
-</div>
-
-<script>
-const board=document.getElementById("board");
+</div><script>
+let board=document.getElementById("board");
+let total=100;
+let texts=[];
 let pos=[1,1];
 let turn=0;
 
-for(let i=100;i>=1;i--){
-  const c=document.createElement("div");
-  c.className="cell";
-  c.textContent=i;
-  board.appendChild(c);
+const snakes={16:6,48:30,79:19};
+const ladders={3:22,15:44,42:78};
+
+function buildBoard(){
+  board.innerHTML="";
+  board.style.gridTemplateColumns=`repeat(${Math.sqrt(total)},1fr)`;
+  for(let i=total;i>=1;i--){
+    let c=document.createElement("div");
+    c.className="cell";
+    c.innerHTML=`${i}<br>${texts[i-1]||""}`;
+    board.appendChild(c);
+  }
 }
 
-const p1=document.createElement("div");
-p1.className="pawn p1";
-const p2=document.createElement("div");
-p2.className="pawn p2";
-board.appendChild(p1);
-board.appendChild(p2);
+const p1=document.createElement("div");p1.className="pawn p1";
+const p2=document.createElement("div");p2.className="pawn p2";
+board.appendChild(p1);board.appendChild(p2);
 
 function placePawn(p,el){
-  const cell=board.children[100-p];
+  const cell=board.children[total-p];
   el.style.left=cell.offsetLeft+4+"px";
   el.style.top=cell.offsetTop+4+"px";
 }
 
-placePawn(1,p1);
-placePawn(1,p2);
-
 function rollDice(){
-  const d=Math.floor(Math.random()*6)+1;
-  document.getElementById("dice").textContent=d;
-  pos[turn]+=d;
-  if(pos[turn]>100)pos[turn]=100;
-  placePawn(pos[turn],turn===0?p1:p2);
-  turn=1-turn;
-  document.getElementById("turn").textContent="Giliran: Pemain "+(turn+1);
-}
-</script>
+  const dice=document.getElementById("dice");
+  dice.classList.add("spin");
+  setTimeout(()=>{
+    dice.classList.remove("spin");
+    const d=Math.floor(Math.random()*6)+1;
+    dice.textContent=d;
+    pos[turn]+=d;
+    if(pos[turn]>total)pos[turn]=total;
 
-</body>
+    if(ladders[pos[turn]])pos[turn]=ladders[pos[turn]];
+    if(snakes[pos[turn]])pos[turn]=snakes[pos[turn]];
+
+    placePawn(pos[turn],turn===0?p1:p2);
+    turn=1-turn;
+    document.getElementById("turn").textContent="Giliran: Pemain "+(turn+1);
+  },600);
+}
+
+function resetGame(){pos=[1,1];turn=0;placePawn(1,p1);placePawn(1,p2)}
+
+function applySettings(){
+  total=parseInt(document.getElementById("totalCell").value);
+  texts=document.getElementById("cellText").value.split(",");
+  buildBoard();resetGame();
+}
+
+applySettings();
+</script></body>
 </html>
